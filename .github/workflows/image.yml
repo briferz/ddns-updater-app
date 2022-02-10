@@ -21,6 +21,6 @@ jobs:
       - name: build and push the image
         run: |
           docker buildx build \
-          --push
+          --push \
           --tag brifer/ddns-updater:latest \
           --platform linux/arm/v8,linux/amd64 .
