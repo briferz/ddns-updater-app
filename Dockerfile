@@ -1,7 +1,6 @@
 FROM golang:latest as builder
 
 ENV CGO_ENABLED=0
-RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 COPY . .
