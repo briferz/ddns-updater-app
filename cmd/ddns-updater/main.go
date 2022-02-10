@@ -1,19 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 )
 
 type conf struct {
-	queryUrl string
-	apiUrl   string
-	hostname string
-	username string
-	password string
+	queryUrl  string
+	apiUrl    string
+	hostname  string
+	username  string
+	password  string
+	userAgent string
 }
 
 func main() {
@@ -57,20 +60,30 @@ func main() {
 	log.Printf("Updated current IP Address %s successfully at %s in %v\n", currentIp, c.apiUrl, elapsedTime)
 }
 
-func retrieveEnvVar(key string) string {
+func retrieveEnvVar(key string, required bool) string {
 	v, ok := os.LookupEnv(key)
-	if !ok {
+	if !ok && required {
 		log.Fatalf("No environment variable %s was found.", key)
 	}
 	return v
 }
 
+func retrieveEnvVarOrDefault(key string, def string) string {
+	v := retrieveEnvVar(key, false)
+	if v != "" {
+		return v
+	}
+	return def
+}
+
 func getConf() conf {
+	defaultUserAgent := fmt.Sprintf("MyProjectCompany %s/%s/%s my.mail@example.com", os.Args[0], runtime.GOOS, runtime.GOARCH)
 	return conf{
-		queryUrl: retrieveEnvVar("IP_QUERY_URL"),
-		apiUrl:   retrieveEnvVar("DDNS_API_URL"),
-		hostname: retrieveEnvVar("DDNS_HOSTNAME"),
-		username: retrieveEnvVar("DDNS_USERNAME"),
-		password: retrieveEnvVar("DDNS_PASSWORD"),
+		queryUrl:  retrieveEnvVar("IP_QUERY_URL", true),
+		apiUrl:    retrieveEnvVar("DDNS_API_URL", true),
+		hostname:  retrieveEnvVar("DDNS_HOSTNAME", true),
+		username:  retrieveEnvVar("DDNS_USERNAME", true),
+		password:  retrieveEnvVar("DDNS_PASSWORD", true),
+		userAgent: retrieveEnvVarOrDefault("DDNS_USER_AGENT", defaultUserAgent),
 	}
 }
